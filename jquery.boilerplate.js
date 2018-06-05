@@ -1,5 +1,5 @@
 /*
- * jQuery Plugin Boilerplate 1.0.0
+ * jQuery Boilerplate 1.0.0
  * https://github.com/romanmz/boilerplate-jquery-plugin
  * By Roman Martinez - https://romanmartinez.me
  */
