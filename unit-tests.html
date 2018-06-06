@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Unit Tests</title>
+	<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.6.1.css">
+	<style>
+		.wrapper {
+			margin: 0 auto;
+			max-width: 900px;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	<div id="qunit"></div>
+	<div id="qunit-fixture"></div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/qunit/qunit-2.6.1.js"></script>
+<script src="jquery.boilerplate.js"></script>
+<script>
+	
+	
+	// Helper functions
+	// ------------------------------
+	function isFunction( object ) {
+		return typeof object === 'function';
+	}
+	function isPluginInstance( object ) {
+		return typeof object == 'object' && object.constructor.name == 'Boilerplate';
+	}
+	function isJqueryInstance( object ) {
+		return typeof object == 'object' && object instanceof jQuery;
+	}
+	function isPlainObject( object ) {
+		return typeof object === 'object' && object instanceof Object;
+	}
+	
+	
+	// Plugin setup
+	// ------------------------------
+	QUnit.test( 'Plugin setup', function( assert ) {
+		
+		// Plugin exists
+		assert.ok( isFunction( $.boilerplate ), '$.boilerplate exists and is a function' );
+		assert.ok( isFunction( $().boilerplate ), '$().boilerplate exists and is a function' );
+		
+		// Plugin contains expected static properties
+		assert.ok( isFunction( $.boilerplate.updateDefaults ), '$.boilerplate.updateDefaults exists and is a function' );
+		
+		// Plugin returns expected objects
+		assert.ok( isPluginInstance( new $.boilerplate() ), 'new $.boilerplate() returns a plugin API object' );
+		assert.ok( isPluginInstance( $.boilerplate() ), '$.boilerplate() returns a plugin API object' );
+		assert.ok( isJqueryInstance( $().boilerplate() ), '$().boilerplate() returns a jQuery object' );
+		
+		// Plugin API object contains expected properties
+		var pluginAPI = new $.boilerplate();
+		assert.ok( isJqueryInstance( pluginAPI.element ), 'pluginAPI.element is a jQuery object' );
+		assert.ok( isPlainObject( pluginAPI.settings ), 'pluginAPI.settings is a plain object' );
+		assert.ok( isFunction( pluginAPI.init ), 'pluginAPI.init is a function' );
+		assert.ok( isFunction( pluginAPI.destroy ), 'pluginAPI.destroy is a function' );
+		
+	});
+	
+	
+	// Plugin settings
+	// ------------------------------
+	QUnit.test( 'Plugin settings', function( assert ) {
+		$('<div id="test" data-boilerplate-foo="4"></div>').appendTo( '#qunit-fixture' );
+		
+		// Plugin settings can be customized
+		assert.strictEqual( $.boilerplate().settings.foo, 1, 'default settings are used' );
+		$.boilerplate.updateDefaults({foo: 2});
+		assert.strictEqual( $.boilerplate().settings.foo, 2, 'default settings can be updated using the $.boilerplate.updateDefaults() method' );
+		assert.strictEqual( $.boilerplate( null, {foo: 3} ).settings.foo, 3, 'custom settings can been passed to each new instance' );
+		assert.strictEqual( $.boilerplate( '#test', {foo: 3} ).settings.foo, 4, 'html data attributes can be used to override settings' );
+		
+	});
+	
+	
+	// Plugin initialization
+	// ------------------------------
+	QUnit.test( 'Plugin initialization', function( assert ) {
+		$('<div id="test"></div>').appendTo( '#qunit-fixture' );
+		var testElement = $('#test');
+		var testAPI = testElement.boilerplate().data('boilerplate');
+		var initValue = testElement.data('test-data');
+		
+		// Init and destroy
+		assert.ok( isPluginInstance( testAPI ), '$().data("boilerplate") holds a copy of the API object' );
+		assert.notStrictEqual( testElement.data('test-data'), undefined, 'pluginAPI.init() runs automatically on each new instance' );
+		testAPI.init();
+		assert.strictEqual( initValue, testElement.data('test-data'), 'pluginAPI.init() can only run once, unless the plugin instance is destroyed' );
+		testAPI.destroy();
+		assert.strictEqual( testElement.data('test-data'), undefined, 'pluginAPI.destroy() undoes everything .init() does' );
+		testAPI.init();
+		assert.notStrictEqual( initValue, testElement.data('test-data'), 'pluginAPI.init() can run again after having been destroyed' );
+		
+		// build-only
+		testAPI.destroy();
+		testElement.boilerplate( null, true );
+		assert.strictEqual( testElement.data('test-data'), undefined, 'passing "true" as the last argument will build the plugin instance without running .init()' );
+		testAPI.init()
+		assert.notStrictEqual( testElement.data('test-data'), undefined, 'thae built-only instance can then be manually initialized at any time using .init()' );
+		
+	});
+	
+	
+</script>
+</body>
+</html>

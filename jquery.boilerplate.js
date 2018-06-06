@@ -39,7 +39,6 @@
 		}
 		this.element = $(element);
 		this.settings = $.extend( {}, defaultSettings, customSettings, settings, getElementSettings( this.element ) );
-		this.element.data( dataAttribute, this );
 		if( !buildOnly ) {
 			this.init();
 		}
@@ -64,13 +63,19 @@
 	// Public instance methods
 	// ------------------------------
 	Plugin.prototype.init = function() {
+		// initialize only once
+		if( this.element.data( dataAttribute ) !== undefined ) {
+			return this;
+		}
 		// …custom initializer code…
+		this.element.data( 'test-data', Math.random() );
 		// …
 		this.element.data( dataAttribute, this );
 		return this;
 	};
 	Plugin.prototype.destroy = function() {
 		// …revert everything except element and settings…
+		this.element.removeData( 'test-data' );
 		// …
 		this.element.removeData( dataAttribute );
 		return this;
